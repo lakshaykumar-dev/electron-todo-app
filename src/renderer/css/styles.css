@@ -738,6 +738,18 @@ kbd {
   position: relative;
   display: flex;
   align-items: center;
+  background-color: var(--bg-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px 8px 4px 38px;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.quick-add-input-wrapper:focus-within {
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+  background-color: var(--bg-tertiary);
 }
 
 .quick-add-plus {
@@ -749,22 +761,42 @@ kbd {
   pointer-events: none;
 }
 
-.quick-add-input-wrapper input {
-  width: 100%;
-  background-color: var(--bg-secondary);
-  border: 1px dashed var(--border-color);
+.quick-add-input-wrapper input#quickAddInput {
+  flex: 1;
+  background: transparent;
+  border: none;
   color: var(--text-main);
-  padding: 12px 16px 12px 38px;
-  border-radius: var(--radius-md);
+  padding: 8px 0;
   outline: none;
   font-size: 14px;
+}
+
+.quick-add-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-add-date {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
   transition: var(--transition);
 }
 
-.quick-add-input-wrapper input:focus {
-  border: 1px solid var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
-  background-color: var(--bg-tertiary);
+.quick-add-date:focus {
+  border-color: var(--accent-primary);
+}
+
+.quick-add-submit-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: var(--radius-md);
 }
 
 /* Task List Header */

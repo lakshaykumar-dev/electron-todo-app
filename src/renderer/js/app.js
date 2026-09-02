@@ -59,6 +59,7 @@
     // Quick Add
     quickAddForm: document.getElementById('quickAddForm'),
     quickAddInput: document.getElementById('quickAddInput'),
+    quickAddDueDate: document.getElementById('quickAddDueDate'),
 
     // Task List
     taskSectionTitle: document.getElementById('taskSectionTitle'),
@@ -130,6 +131,9 @@
     applyTheme(state.theme);
     setupWindowControls();
     setupEventListeners();
+    if (elements.quickAddDueDate) {
+      elements.quickAddDueDate.value = getTodayString();
+    }
     await loadInitialData();
     render();
   }
@@ -222,19 +226,24 @@
         }
       }
 
+      const dueDate = elements.quickAddDueDate?.value || getTodayString();
+
       const newTodo = {
         id: 'task-' + Date.now(),
         projectId: targetProjectId,
         title: title,
         description: '',
         priority: state.activeView === 'important' ? 'High' : 'Medium',
-        dueDate: state.activeView === 'today' ? getTodayString() : '',
+        dueDate: dueDate,
         completed: false,
         createdAt: new Date().toISOString()
       };
 
       state.todos.unshift(newTodo);
       elements.quickAddInput.value = '';
+      if (elements.quickAddDueDate) {
+        elements.quickAddDueDate.value = getTodayString();
+      }
       persistAndRender();
       showToast('Task added to project! 🎯');
     });
@@ -487,7 +496,7 @@
       elements.taskDescInput.value = taskToEdit.description || '';
       elements.taskProjectSelect.value = taskToEdit.projectId;
       elements.taskPrioritySelect.value = taskToEdit.priority || 'Medium';
-      elements.taskDueDateInput.value = taskToEdit.dueDate || '';
+      elements.taskDueDateInput.value = taskToEdit.dueDate || getTodayString();
     } else {
       elements.taskModalTitle.textContent = 'Create New Task';
       elements.taskEditId.value = '';
@@ -498,9 +507,8 @@
       if (state.activeView === 'important') {
         elements.taskPrioritySelect.value = 'High';
       }
-      if (state.activeView === 'today') {
-        elements.taskDueDateInput.value = getTodayString();
-      }
+      // Default to today's date
+      elements.taskDueDateInput.value = getTodayString();
     }
 
     elements.taskModal.classList.remove('hidden');
