@@ -311,6 +311,19 @@
     // Clear Completed Tasks
     elements.clearCompletedBtn?.addEventListener('click', clearCompletedTasks);
 
+    // Make clicking anywhere on date inputs trigger native picker popup
+    document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+      dateInput.addEventListener('click', () => {
+        try {
+          if (typeof dateInput.showPicker === 'function') {
+            dateInput.showPicker();
+          }
+        } catch (err) {
+          // Ignore if already open or unsupported
+        }
+      });
+    });
+
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       // Ctrl+N: New Task
@@ -936,7 +949,11 @@
   // Helpers
   // --------------------------------------------------------------------------
   function getTodayString() {
-    return new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   function formatDueDate(dueDateStr) {
