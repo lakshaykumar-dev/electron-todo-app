@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -174,6 +174,73 @@ ipcMain.handle('todos:save', async (_, data) => {
   } catch (error) {
     console.error('Error saving data:', error);
     return { success: false, error: error.message };
+  }
+});
+
+// IPC: Export Backup Data
+ipcMain.handle('data:export', async (_, payload) => {
+  if (!mainWindow) return { success: false, error: 'Window not available' };
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const defaultFilename = `taskflow-backup-${today}.json`;
+
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export TaskFlow Backup',
+      defaultPath: defaultFilename,
+      filters: [
+        { name: 'JSON Backup Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+
+    if (canceled || !filePath) {
+      return { success: false, canceled: true };
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    return { success: true, filePath };
+  } catch (err) {
+    console.error('Error exporting backup:', err);
+    return { success: false, error: err.message };
+  }
+});
+
+// IPC: Import Backup Data
+ipcMain.handle('data:import', async () => {
+  if (!mainWindow) return { success: false, error: 'Window not available' };
+  try {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select TaskFlow Backup File',
+      properties: ['openFile'],
+      filters: [
+        { name: 'JSON Backup Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+
+    if (canceled || !filePaths || filePaths.length === 0) {
+      return { success: false, canceled: true };
+    }
+
+    const rawContent = fs.readFileSync(filePaths[0], 'utf8');
+    const parsed = JSON.parse(rawContent);
+
+    // Validate: must contain projects array or todos array
+    if (!parsed || (!Array.isArray(parsed.projects) && !Array.isArray(parsed.todos))) {
+      return { success: false, error: 'Invalid backup file format. Expected projects or tasks array.' };
+    }
+
+    return {
+      success: true,
+      filePath: filePaths[0],
+      data: {
+        projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+        todos: Array.isArray(parsed.todos) ? parsed.todos : []
+      }
+    };
+  } catch (err) {
+    console.error('Error importing backup:', err);
+    return { success: false, error: err.message };
   }
 });
 

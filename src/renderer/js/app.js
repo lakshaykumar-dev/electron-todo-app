@@ -15,7 +15,8 @@
     sortBy: 'created-desc',
     theme: localStorage.getItem('taskflow-theme') || 'dark',
     lastDeleted: null,
-    projectToDeleteId: null
+    projectToDeleteId: null,
+    pendingImportData: null
   };
 
   // DOM Elements
@@ -101,6 +102,19 @@
     closeDeleteModalBtn: document.getElementById('closeDeleteModalBtn'),
     cancelDeleteBtn: document.getElementById('cancelDeleteBtn'),
     confirmDeleteBtn: document.getElementById('confirmDeleteBtn'),
+
+    // Sidebar Data Backup Actions
+    exportDataBtn: document.getElementById('exportDataBtn'),
+    importDataBtn: document.getElementById('importDataBtn'),
+
+    // Import Modal
+    importModal: document.getElementById('importModal'),
+    importSummaryText: document.getElementById('importSummaryText'),
+    importMergeBtn: document.getElementById('importMergeBtn'),
+    importReplaceBtn: document.getElementById('importReplaceBtn'),
+    closeImportModalBtn: document.getElementById('closeImportModalBtn'),
+    cancelImportBtn: document.getElementById('cancelImportBtn'),
+    fallbackFileInput: document.getElementById('fallbackFileInput'),
 
     // Toast Container
     toastContainer: document.getElementById('toastContainer')
@@ -311,6 +325,18 @@
     // Clear Completed Tasks
     elements.clearCompletedBtn?.addEventListener('click', clearCompletedTasks);
 
+    // Sidebar Data Backup (Export & Import)
+    elements.exportDataBtn?.addEventListener('click', handleExport);
+    elements.importDataBtn?.addEventListener('click', handleImportClick);
+    elements.importMergeBtn?.addEventListener('click', handleMergeImport);
+    elements.importReplaceBtn?.addEventListener('click', handleReplaceImport);
+    elements.closeImportModalBtn?.addEventListener('click', closeImportModal);
+    elements.cancelImportBtn?.addEventListener('click', closeImportModal);
+    elements.importModal?.addEventListener('click', (e) => {
+      if (e.target === elements.importModal) closeImportModal();
+    });
+    elements.fallbackFileInput?.addEventListener('change', handleFallbackFileSelect);
+
     // Make clicking anywhere on date inputs trigger native picker popup
     document.querySelectorAll('input[type="date"]').forEach(dateInput => {
       dateInput.addEventListener('click', () => {
@@ -347,6 +373,7 @@
         closeTaskModal();
         closeProjectModal();
         closeDeleteModal();
+        closeImportModal();
       }
     });
   }
@@ -1011,6 +1038,141 @@
       toast.style.transition = 'all 0.3s ease';
       setTimeout(() => toast.remove(), 300);
     }, 4000);
+  }
+
+  // --------------------------------------------------------------------------
+  // Data Backup: Export & Import
+  // --------------------------------------------------------------------------
+  async function handleExport() {
+    const backupData = {
+      app: 'TaskFlow',
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      projects: state.projects,
+      todos: state.todos
+    };
+
+    if (window.todoApp && typeof window.todoApp.exportBackup === 'function') {
+      const res = await window.todoApp.exportBackup(backupData);
+      if (res && res.success) {
+        showToast('Backup exported successfully! 💾');
+      } else if (res && !res.canceled && res.error) {
+        showToast(`Export error: ${res.error}`);
+      }
+    } else {
+      // Browser fallback
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `taskflow-backup-${getTodayString()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup file downloaded! 💾');
+    }
+  }
+
+  async function handleImportClick() {
+    if (window.todoApp && typeof window.todoApp.importBackup === 'function') {
+      const res = await window.todoApp.importBackup();
+      if (res && res.success && res.data) {
+        promptImportOptions(res.data);
+      } else if (res && !res.canceled && res.error) {
+        showToast(`Import error: ${res.error}`);
+      }
+    } else {
+      elements.fallbackFileInput?.click();
+    }
+  }
+
+  function handleFallbackFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!parsed || (!Array.isArray(parsed.projects) && !Array.isArray(parsed.todos))) {
+          showToast('Invalid backup file. Missing projects or tasks.');
+          return;
+        }
+        promptImportOptions({
+          projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+          todos: Array.isArray(parsed.todos) ? parsed.todos : []
+        });
+      } catch (err) {
+        showToast('Failed to parse JSON backup file.');
+      }
+    };
+    reader.readAsText(file);
+    elements.fallbackFileInput.value = '';
+  }
+
+  function promptImportOptions(data) {
+    state.pendingImportData = data;
+    const projectCount = (data.projects || []).length;
+    const taskCount = (data.todos || []).length;
+
+    elements.importSummaryText.innerHTML = `
+      Found <strong>${projectCount}</strong> project${projectCount === 1 ? '' : 's'} and <strong>${taskCount}</strong> task${taskCount === 1 ? '' : 's'} in this backup file.
+    `;
+    elements.importModal.classList.remove('hidden');
+  }
+
+  function closeImportModal() {
+    elements.importModal.classList.add('hidden');
+    state.pendingImportData = null;
+  }
+
+  function handleMergeImport() {
+    if (!state.pendingImportData) return;
+    const { projects = [], todos = [] } = state.pendingImportData;
+
+    let addedProjects = 0;
+    let addedTasks = 0;
+
+    // Merge projects
+    projects.forEach(importedProj => {
+      const exists = state.projects.some(p => p.id === importedProj.id || p.name.toLowerCase() === importedProj.name.toLowerCase());
+      if (!exists) {
+        state.projects.push(importedProj);
+        addedProjects++;
+      }
+    });
+
+    // Merge tasks
+    todos.forEach(importedTask => {
+      const exists = state.todos.some(t => t.id === importedTask.id);
+      if (!exists) {
+        state.todos.push(importedTask);
+        addedTasks++;
+      }
+    });
+
+    closeImportModal();
+    persistAndRender();
+    showToast(`Merged ${addedProjects} project(s) & ${addedTasks} task(s)! ➕`);
+  }
+
+  function handleReplaceImport() {
+    if (!state.pendingImportData) return;
+    const { projects = [], todos = [] } = state.pendingImportData;
+
+    state.projects = projects;
+    state.todos = todos;
+
+    if (state.projects.length > 0) {
+      state.activeProjectId = state.projects[0].id;
+      state.activeView = 'project';
+    } else {
+      state.activeProjectId = null;
+      state.activeView = 'all-projects';
+    }
+
+    closeImportModal();
+    persistAndRender();
+    showToast(`Workspace replaced with backup! (${projects.length} projects, ${todos.length} tasks) 🔄`);
   }
 
   // Kick off application

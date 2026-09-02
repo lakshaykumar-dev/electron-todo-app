@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('todoApp', {
   saveData: (data) => ipcRenderer.invoke('todos:save', data),
   loadTodos: () => ipcRenderer.invoke('todos:load'),
   saveTodos: (data) => ipcRenderer.invoke('todos:save', data),
+  exportBackup: (data) => ipcRenderer.invoke('data:export', data),
+  importBackup: () => ipcRenderer.invoke('data:import'),
 
   // Window control API
   minimizeWindow: () => ipcRenderer.send('window:minimize'),

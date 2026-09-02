@@ -431,6 +431,35 @@ input, textarea, select, button {
   border-top: 1px solid var(--border-color);
 }
 
+.sidebar-data-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sidebar-data-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.sidebar-data-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-primary);
+  color: var(--text-main);
+}
+
 .shortcut-tip {
   display: flex;
   flex-direction: column;
@@ -1166,6 +1195,68 @@ kbd {
   color: var(--text-muted);
   line-height: 1.5;
   margin-bottom: 10px;
+}
+
+.modal-medium {
+  max-width: 440px;
+}
+
+.import-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 12px 0;
+}
+
+.import-option-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-main);
+  width: 100%;
+}
+
+.import-option-card:hover {
+  border-color: var(--accent-primary);
+  background-color: rgba(99, 102, 241, 0.08);
+  transform: translateY(-1px);
+}
+
+.import-option-card.danger-card:hover {
+  border-color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.import-card-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.import-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.import-card-details strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.import-card-details span {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 .form-group {

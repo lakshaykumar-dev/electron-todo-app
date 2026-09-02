@@ -38,6 +38,12 @@ A modern desktop Project & Task Management application built with **Electron**, 
 - Keyboard shortcuts for power users.
 - Local JSON persistence in the operating system's `userData` directory.
 
+### 💾 Backup, Import & Export
+- **Export Backup**: 1-click export of all projects, tasks, priorities, and deadlines to a clean JSON file (`taskflow-backup-YYYY-MM-DD.json`).
+- **Import / Restore**: Easily transfer projects to a new computer or restore a backup. Choose between:
+  - **Merge**: Add imported projects and tasks without touching existing ones.
+  - **Replace All**: Restore the workspace to the exact backup state.
+
 ---
 
 ## ⌨️ Keyboard Shortcuts
