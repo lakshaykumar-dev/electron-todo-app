@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow - Project Manager</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Custom Desktop Title Bar -->
+  <header class="titlebar">
+    <div class="titlebar-drag">
+      <div class="app-logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+        <span class="app-title">TaskFlow <span class="badge-title">Project Manager</span></span>
+      </div>
+    </div>
+    
+    <div class="titlebar-actions">
+      <!-- Theme Toggle -->
+      <button id="themeToggleBtn" class="action-btn" title="Toggle Dark/Light Mode">
+        <svg id="moonIcon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+        <svg id="sunIcon" class="icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+      </button>
+
+      <!-- Window controls -->
+      <button id="minBtn" class="win-btn" title="Minimize">
+        <svg viewBox="0 0 12 12" width="10" height="10">
+          <rect y="5" width="12" height="1.5" fill="currentColor" />
+        </svg>
+      </button>
+      <button id="maxBtn" class="win-btn" title="Maximize / Restore">
+        <svg id="maxIcon" viewBox="0 0 12 12" width="10" height="10">
+          <rect x="1" y="1" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+      <button id="closeBtn" class="win-btn close" title="Close">
+        <svg viewBox="0 0 12 12" width="10" height="10">
+          <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" />
+          <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Application Shell -->
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Projects Section Header -->
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span class="nav-section-title">Projects</span>
+          <button id="openNewProjectModalBtn" class="add-btn" title="Create New Project">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>New</span>
+          </button>
+        </div>
+
+        <!-- Projects List -->
+        <div id="projectsList" class="projects-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Quick Views Section -->
+      <div class="sidebar-section">
+        <div class="nav-section-title">Views</div>
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-view="all-projects">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>All Projects</span>
+            <span id="badgeAllProjects" class="nav-badge">0</span>
+          </button>
+
+          <button class="nav-item" data-view="today">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Due Today</span>
+            <span id="badgeToday" class="nav-badge">0</span>
+          </button>
+
+          <button class="nav-item" data-view="important">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>High Priority</span>
+            <span id="badgeImportant" class="nav-badge">0</span>
+          </button>
+
+          <button class="nav-item" data-view="completed">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>Completed</span>
+            <span id="badgeCompleted" class="nav-badge">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Footer Quick Info -->
+      <div class="sidebar-footer">
+        <div class="shortcut-tip">
+          <span><kbd>Ctrl</kbd> + <kbd>N</kbd> New task</span>
+          <span><kbd>Ctrl</kbd> + <kbd>P</kbd> New project</span>
+          <span><kbd>Ctrl</kbd> + <kbd>F</kbd> Search</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Action & Search Toolbar -->
+      <section class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search tasks or projects... (Ctrl+F)" autocomplete="off">
+          <button id="clearSearchBtn" class="clear-search-btn hidden">&times;</button>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="sort-wrapper">
+            <label for="sortSelect">Sort:</label>
+            <select id="sortSelect" class="styled-select">
+              <option value="created-desc">Newest First</option>
+              <option value="created-asc">Oldest First</option>
+              <option value="due-date">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="title">Alphabetical</option>
+            </select>
+          </div>
+
+          <button id="openNewTaskModalBtn" class="btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>New Task</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Dynamic Project / View Banner -->
+      <section id="projectBanner" class="project-banner">
+        <div class="banner-top">
+          <div class="banner-title-area">
+            <div class="title-with-color">
+              <span id="bannerColorDot" class="banner-color-dot"></span>
+              <h1 id="bannerTitle">All Projects</h1>
+            </div>
+            <p id="bannerDesc" class="banner-desc">Overview of all active projects and team deliverables</p>
+          </div>
+
+          <!-- Project Actions (when viewing a specific project) -->
+          <div id="projectActions" class="project-actions hidden">
+            <button id="editProjectBtn" class="btn-secondary" title="Edit project details">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Edit</span>
+            </button>
+            <button id="deleteProjectBtn" class="btn-secondary danger-hover" title="Delete project">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner Stats and Progress Bar -->
+        <div class="banner-progress-card">
+          <div class="banner-progress-info">
+            <div class="progress-labels">
+              <span class="progress-title">Project Completion</span>
+              <span id="bannerProgressRatio" class="progress-ratio">0 of 0 tasks done</span>
+            </div>
+            <span id="bannerProgressPercent" class="progress-badge">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="bannerProgressBarFill" class="progress-bar-fill" style="width: 0%"></div>
+          </div>
+          <div id="bannerDeadlineWrap" class="banner-deadline hidden">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="bannerDeadlineText">Target Deadline: Oct 15, 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Add Input scoped to Active Project -->
+      <form id="quickAddForm" class="quick-add-form">
+        <div class="quick-add-input-wrapper">
+          <span class="quick-add-plus">+</span>
+          <input type="text" id="quickAddInput" placeholder="Add a task to this project and press Enter..." autocomplete="off">
+        </div>
+      </form>
+
+      <!-- Filter Controls & Header -->
+      <div class="task-list-header">
+        <div class="task-count-info">
+          <span id="taskSectionTitle" class="section-heading">Tasks</span>
+          <span id="taskCountBadge" class="count-pill">0 tasks</span>
+        </div>
+        <button id="clearCompletedBtn" class="btn-secondary hidden">Clear Completed</button>
+      </div>
+
+      <!-- Tasks List Container -->
+      <section class="task-list-wrapper">
+        <ul id="taskList" class="task-list">
+          <!-- Rendered dynamically -->
+        </ul>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </div>
+          <h3 id="emptyStateTitle">No tasks in this project</h3>
+          <p id="emptyStateMsg">Create a task to get your project moving forward.</p>
+          <button id="emptyStateAddBtn" class="btn-primary">Create Task</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       Modals
+       ========================================================================= -->
+
+  <!-- Create / Edit Project Modal -->
+  <div id="projectModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="projectModalTitle">Create New Project</h2>
+        <button id="closeProjectModalBtn" class="modal-close">&times;</button>
+      </div>
+
+      <form id="projectForm">
+        <input type="hidden" id="projectEditId" value="">
+
+        <div class="form-group">
+          <label for="projectNameInput">Project Name <span class="required">*</span></label>
+          <input type="text" id="projectNameInput" placeholder="e.g. Website Redesign, Mobile MVP" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="projectDescInput">Description / Goals</label>
+          <textarea id="projectDescInput" rows="3" placeholder="Brief outline of deliverables, objectives, or client details..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Project Color</label>
+            <div class="color-picker-palette">
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#6366f1" checked>
+                <span class="color-swatch" style="background: #6366f1"></span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#06b6d4">
+                <span class="color-swatch" style="background: #06b6d4"></span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#10b981">
+                <span class="color-swatch" style="background: #10b981"></span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#f59e0b">
+                <span class="color-swatch" style="background: #f59e0b"></span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#ec4899">
+                <span class="color-swatch" style="background: #ec4899"></span>
+              </label>
+              <label class="color-radio">
+                <input type="radio" name="projectColor" value="#8b5cf6">
+                <span class="color-swatch" style="background: #8b5cf6"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="projectDeadlineInput">Target Deadline</label>
+            <input type="date" id="projectDeadlineInput" class="styled-date">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelProjectBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create / Edit Task Modal -->
+  <div id="taskModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="taskModalTitle">Create New Task</h2>
+        <button id="closeTaskModalBtn" class="modal-close">&times;</button>
+      </div>
+
+      <form id="taskForm">
+        <input type="hidden" id="taskEditId" value="">
+
+        <div class="form-group">
+          <label for="taskProjectSelect">Project <span class="required">*</span></label>
+          <select id="taskProjectSelect" class="styled-select" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="taskTitleInput">Task Title <span class="required">*</span></label>
+          <input type="text" id="taskTitleInput" placeholder="What needs to be accomplished?" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="taskDescInput">Details / Notes</label>
+          <textarea id="taskDescInput" rows="3" placeholder="Add specifics, checklist items, links or notes..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="taskPrioritySelect">Priority</label>
+            <select id="taskPrioritySelect" class="styled-select">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="taskDueDateInput">Due Date</label>
+            <input type="date" id="taskDueDateInput" class="styled-date">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelTaskBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" id="saveTaskBtn" class="btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Project Confirmation Dialog -->
+  <div id="deleteConfirmModal" class="modal-overlay hidden">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>Delete Project?</h2>
+        <button id="closeDeleteModalBtn" class="modal-close">&times;</button>
+      </div>
+      <p id="deleteConfirmMsg" class="modal-desc">
+        Are you sure you want to delete this project? All associated tasks will also be removed.
+      </p>
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteBtn" class="btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn-primary danger-btn">Delete Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
