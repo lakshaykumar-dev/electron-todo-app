@@ -1,6 +1,10 @@
 # TaskFlow - Project Manager Desktop Application (Electron)
 
+[![GitHub Release](https://img.shields.io/github/v/release/lakshaykumar-dev/electron-todo-app?include_prereleases&color=6366f1&label=Release)](https://github.com/lakshaykumar-dev/electron-todo-app/releases/latest)
+
 A modern desktop Project & Task Management application built with **Electron**, **HTML5**, **CSS3**, and **JavaScript**. Designed for project managers to organize workflows, assign tasks to projects, monitor completion rates, and meet milestones.
+
+📥 **[Download Latest Windows Executable (.exe / .zip)](https://github.com/lakshaykumar-dev/electron-todo-app/releases/latest)**
 
 ---
 
