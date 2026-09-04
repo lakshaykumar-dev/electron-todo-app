@@ -1,8 +1,65 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Notification, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow = null;
+
+// Helper to fetch webpage title and domain favicon
+async function fetchWebpageTitle(urlStr) {
+  try {
+    let targetUrl = urlStr.trim();
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    const response = await fetch(targetUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    clearTimeout(timeoutId);
+
+    const html = await response.text();
+    const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    let title = match ? match[1].trim() : '';
+
+    // Clean HTML entities & whitespace
+    title = title.replace(/\s+/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'");
+
+    const parsedUrl = new URL(targetUrl);
+    const domain = parsedUrl.hostname.replace(/^www\./, '');
+
+    if (!title) {
+      title = domain;
+    }
+
+    const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    return { success: true, title, url: targetUrl, domain, favicon };
+  } catch (err) {
+    console.error('Error fetching webpage title:', err);
+    try {
+      let targetUrl = urlStr.trim();
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        targetUrl = 'https://' + targetUrl;
+      }
+      const parsedUrl = new URL(targetUrl);
+      const domain = parsedUrl.hostname.replace(/^www\./, '');
+      const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+      return { success: true, title: domain, url: targetUrl, domain, favicon };
+    } catch (e) {
+      return { success: false, error: err.message || 'Invalid URL' };
+    }
+  }
+}
 
 // File persistence path in user data folder
 const getDataFilePath = () => {
@@ -86,7 +143,19 @@ const getInitialData = () => {
     }
   ];
 
-  return { projects: defaultProjects, todos: defaultTodos };
+  const defaultUrls = [
+    {
+      id: 'url-1',
+      projectId: proj1Id,
+      url: 'https://github.com/lakshaykumar-smartdata/electron-todo-app',
+      title: 'GitHub - lakshaykumar-smartdata/electron-todo-app',
+      domain: 'github.com',
+      favicon: 'https://www.google.com/s2/favicons?domain=github.com&sz=64',
+      createdAt: new Date().toISOString()
+    }
+  ];
+
+  return { projects: defaultProjects, todos: defaultTodos, urls: defaultUrls };
 };
 
 function createWindow() {
@@ -225,9 +294,9 @@ ipcMain.handle('data:import', async () => {
     const rawContent = fs.readFileSync(filePaths[0], 'utf8');
     const parsed = JSON.parse(rawContent);
 
-    // Validate: must contain projects array or todos array
-    if (!parsed || (!Array.isArray(parsed.projects) && !Array.isArray(parsed.todos))) {
-      return { success: false, error: 'Invalid backup file format. Expected projects or tasks array.' };
+    // Validate: must contain projects, todos, or urls array
+    if (!parsed || (!Array.isArray(parsed.projects) && !Array.isArray(parsed.todos) && !Array.isArray(parsed.urls))) {
+      return { success: false, error: 'Invalid backup file format. Expected projects, tasks, or urls array.' };
     }
 
     return {
@@ -235,7 +304,8 @@ ipcMain.handle('data:import', async () => {
       filePath: filePaths[0],
       data: {
         projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-        todos: Array.isArray(parsed.todos) ? parsed.todos : []
+        todos: Array.isArray(parsed.todos) ? parsed.todos : [],
+        urls: Array.isArray(parsed.urls) ? parsed.urls : []
       }
     };
   } catch (err) {
@@ -264,6 +334,80 @@ ipcMain.on('window:close', () => {
 
 ipcMain.handle('window:is-maximized', () => {
   return mainWindow ? mainWindow.isMaximized() : false;
+});
+
+// Fix for Windows Toast Notifications
+if (process.platform === 'win32') {
+  app.setAppUserModelId('TaskFlow.App');
+}
+
+function bringWindowToFront() {
+  if (!mainWindow) return;
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  mainWindow.focus();
+  mainWindow.flashFrame(true);
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setAlwaysOnTop(false);
+    }
+  }, 1000);
+}
+
+// IPC: Native Desktop Notifications & Window Focus
+ipcMain.handle('notification:show', async (_, { title, body, taskId }) => {
+  try {
+    if (!Notification.isSupported()) {
+      return { success: false, error: 'Notifications not supported' };
+    }
+
+    const notification = new Notification({
+      title: title || 'TaskFlow Reminder ⏰',
+      body: body || 'You have a task due!',
+      silent: false
+    });
+
+    notification.on('click', () => {
+      bringWindowToFront();
+      if (mainWindow && taskId) {
+        mainWindow.webContents.send('notification:clicked', { taskId });
+      }
+    });
+
+    notification.show();
+    return { success: true };
+  } catch (err) {
+    console.error('Error showing notification:', err);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('window:focus', async () => {
+  bringWindowToFront();
+  return { success: true };
+});
+
+// IPC: URL Bookmarks & Web Title Fetcher
+ipcMain.handle('url:fetch-title', async (_, urlStr) => {
+  return await fetchWebpageTitle(urlStr);
+});
+
+ipcMain.handle('url:open-external', async (_, urlStr) => {
+  try {
+    if (urlStr) {
+      let target = urlStr.trim();
+      if (!target.startsWith('http://') && !target.startsWith('https://')) {
+        target = 'https://' + target;
+      }
+      await shell.openExternal(target);
+      return { success: true };
+    }
+    return { success: false, error: 'Empty URL' };
+  } catch (err) {
+    console.error('Error opening external URL:', err);
+    return { success: false, error: err.message };
+  }
 });
 
 app.whenReady().then(() => {

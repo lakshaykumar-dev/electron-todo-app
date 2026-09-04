@@ -781,7 +781,8 @@ kbd {
   background-color: var(--bg-tertiary);
 }
 
-.quick-add-plus {
+.quick-add-plus,
+.quick-add-plus-icon {
   position: absolute;
   left: 14px;
   font-size: 18px;
@@ -790,7 +791,7 @@ kbd {
   pointer-events: none;
 }
 
-.quick-add-input-wrapper input#quickAddInput {
+.quick-add-input-wrapper input[type="text"] {
   flex: 1;
   background: transparent;
   border: none;
@@ -798,6 +799,7 @@ kbd {
   padding: 8px 0;
   outline: none;
   font-size: 14px;
+  width: 100%;
 }
 
 .quick-add-actions {
@@ -1429,6 +1431,257 @@ input[type="date"]::-webkit-datetime-edit-year-field {
 /* Utilities */
 .hidden {
   display: none !important;
+}
+
+/* Action Btn Active State for Reminder Bell */
+.action-btn.active {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.15);
+}
+
+.quick-add-time {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.quick-add-time:focus {
+  border-color: var(--accent-primary);
+}
+
+/* Interactive Reminder Popup Modal */
+.reminder-modal-content {
+  border-top: 4px solid #f59e0b;
+}
+
+.reminder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reminder-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reminder-bell-badge {
+  font-size: 28px;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reminder-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 16px 0;
+  padding-right: 4px;
+}
+
+.reminder-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  transition: var(--transition);
+}
+
+.reminder-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.reminder-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reminder-proj-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.reminder-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 2px 0 0 0;
+}
+
+.reminder-item-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.reminder-item-meta {
+  margin-top: 2px;
+}
+
+.reminder-due-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.reminder-due-tag.overdue {
+  color: #f43f5e;
+  background-color: rgba(244, 63, 94, 0.12);
+}
+
+.reminder-due-tag.due {
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+.reminder-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.reminder-footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Saved URLs / Bookmarks Grid */
+.urls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  list-style: none;
+}
+
+.url-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.url-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.url-card-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.url-card-favicon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.url-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.url-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url-card-link {
+  font-size: 11px;
+  color: var(--accent-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.url-card-link:hover {
+  text-decoration: underline;
+}
+
+.url-card-link span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.url-card-domain {
+  font-size: 10px;
+  color: var(--text-subtle);
+  font-weight: 500;
+}
+
+.url-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.url-card:hover .url-card-actions {
+  opacity: 1;
 }
 
 /* Keyframes */
