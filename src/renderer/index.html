@@ -20,6 +20,14 @@
     </div>
     
     <div class="titlebar-actions">
+      <!-- Reminder Notification Toggle -->
+      <button id="toggleRemindersBtn" class="action-btn active" title="Desktop Task Reminders: ON (Click to toggle)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      </button>
+
       <!-- Theme Toggle -->
       <button id="themeToggleBtn" class="action-btn" title="Toggle Dark/Light Mode">
         <svg id="moonIcon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,6 +83,27 @@
       </div>
 
       <!-- Quick Views Section -->
+      <div class="sidebar-section">
+        <div class="nav-section-title">Navigation</div>
+        <nav class="sidebar-nav">
+          <button id="tabTasksBtn" class="nav-item active" data-tab="tasks">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            <span>Tasks</span>
+          </button>
+          <button id="tabUrlsBtn" class="nav-item" data-tab="urls">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <span>Saved URLs</span>
+            <span id="badgeUrls" class="nav-badge">0</span>
+          </button>
+        </nav>
+      </div>
+
       <div class="sidebar-section">
         <div class="nav-section-title">Views</div>
         <nav class="sidebar-nav">
@@ -234,46 +263,95 @@
         </div>
       </section>
 
-      <!-- Quick Add Input scoped to Active Project -->
-      <form id="quickAddForm" class="quick-add-form">
-        <div class="quick-add-input-wrapper">
-          <span class="quick-add-plus">+</span>
-          <input type="text" id="quickAddInput" placeholder="Add a task to this project and press Enter..." autocomplete="off">
-          <div class="quick-add-actions">
-            <input type="date" id="quickAddDueDate" class="styled-date quick-add-date" title="Task Due Date">
-            <button type="submit" class="btn-primary quick-add-submit-btn">Add</button>
+      <!-- Tasks Main View Container -->
+      <div id="tasksSection" class="tab-content-container">
+        <!-- Quick Add Input scoped to Active Project -->
+        <form id="quickAddForm" class="quick-add-form">
+          <div class="quick-add-input-wrapper">
+            <span class="quick-add-plus">+</span>
+            <input type="text" id="quickAddInput" placeholder="Add a task to this project and press Enter..." autocomplete="off">
+            <div class="quick-add-actions">
+              <input type="date" id="quickAddDueDate" class="styled-date quick-add-date" title="Task Due Date">
+              <input type="time" id="quickAddDueTime" class="styled-date quick-add-time" title="Task Due Time">
+              <button type="submit" class="btn-primary quick-add-submit-btn">Add</button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      <!-- Filter Controls & Header -->
-      <div class="task-list-header">
-        <div class="task-count-info">
-          <span id="taskSectionTitle" class="section-heading">Tasks</span>
-          <span id="taskCountBadge" class="count-pill">0 tasks</span>
+        <!-- Filter Controls & Header -->
+        <div class="task-list-header">
+          <div class="task-count-info">
+            <span id="taskSectionTitle" class="section-heading">Tasks</span>
+            <span id="taskCountBadge" class="count-pill">0 tasks</span>
+          </div>
+          <button id="clearCompletedBtn" class="btn-secondary hidden">Clear Completed</button>
         </div>
-        <button id="clearCompletedBtn" class="btn-secondary hidden">Clear Completed</button>
+
+        <!-- Tasks List Container -->
+        <section class="task-list-wrapper">
+          <ul id="taskList" class="task-list">
+            <!-- Rendered dynamically -->
+          </ul>
+
+          <!-- Empty State -->
+          <div id="emptyState" class="empty-state hidden">
+            <div class="empty-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </div>
+            <h3 id="emptyStateTitle">No tasks in this project</h3>
+            <p id="emptyStateMsg">Create a task to get your project moving forward.</p>
+            <button id="emptyStateAddBtn" class="btn-primary">Create Task</button>
+          </div>
+        </section>
       </div>
 
-      <!-- Tasks List Container -->
-      <section class="task-list-wrapper">
-        <ul id="taskList" class="task-list">
-          <!-- Rendered dynamically -->
-        </ul>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state hidden">
-          <div class="empty-icon-circle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M9 12l2 2 4-4" />
+      <!-- Saved URLs / Bookmarks Main View Container -->
+      <div id="urlsSection" class="tab-content-container hidden">
+        <!-- Quick Add URL Form -->
+        <form id="quickAddUrlForm" class="quick-add-form url-quick-form">
+          <div class="quick-add-input-wrapper">
+            <svg class="quick-add-plus-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
             </svg>
+            <input type="text" id="quickAddUrlInput" placeholder="Paste website URL (e.g. https://github.com) and press Enter..." autocomplete="off">
+            <div class="quick-add-actions">
+              <button type="submit" id="quickAddUrlSubmitBtn" class="btn-primary quick-add-submit-btn">
+                <span id="urlSubmitBtnText">Add URL</span>
+              </button>
+            </div>
           </div>
-          <h3 id="emptyStateTitle">No tasks in this project</h3>
-          <p id="emptyStateMsg">Create a task to get your project moving forward.</p>
-          <button id="emptyStateAddBtn" class="btn-primary">Create Task</button>
+        </form>
+
+        <div class="task-list-header">
+          <div class="task-count-info">
+            <span id="urlSectionTitle" class="section-heading">Saved URLs & Bookmarks</span>
+            <span id="urlCountBadge" class="count-pill">0 URLs</span>
+          </div>
         </div>
-      </section>
+
+        <!-- URLs List Wrapper -->
+        <section class="url-list-wrapper">
+          <div id="urlsList" class="urls-grid">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Empty State for URLs -->
+          <div id="urlsEmptyState" class="empty-state hidden">
+            <div class="empty-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </div>
+            <h3 id="urlsEmptyTitle">No saved URLs in this project</h3>
+            <p id="urlsEmptyMsg">Paste a URL above to bookmark documentation, resources, or web pages for this project.</p>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
@@ -389,6 +467,11 @@
             <label for="taskDueDateInput">Due Date</label>
             <input type="date" id="taskDueDateInput" class="styled-date">
           </div>
+
+          <div class="form-group flex-1">
+            <label for="taskDueTimeInput">Due Time</label>
+            <input type="time" id="taskDueTimeInput" class="styled-date">
+          </div>
         </div>
 
         <div class="modal-footer">
@@ -445,6 +528,67 @@
       </div>
       <div class="modal-footer">
         <button type="button" id="cancelImportBtn" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit URL Bookmark Modal -->
+  <div id="urlModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="urlModalTitle">Edit Saved Bookmark</h2>
+        <button id="closeUrlModalBtn" class="modal-close">&times;</button>
+      </div>
+
+      <form id="urlForm">
+        <input type="hidden" id="urlEditId" value="">
+
+        <div class="form-group">
+          <label for="urlProjectSelect">Project <span class="required">*</span></label>
+          <select id="urlProjectSelect" class="styled-select" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="urlInput">Web URL <span class="required">*</span></label>
+          <input type="text" id="urlInput" placeholder="https://example.com" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="urlTitleInput">Title / Description <span class="required">*</span></label>
+          <input type="text" id="urlTitleInput" placeholder="Website title or description" required autocomplete="off">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelUrlBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Bookmark</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interactive Task Reminder Popup Modal -->
+  <div id="reminderModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium reminder-modal-content">
+      <div class="modal-header reminder-header">
+        <div class="reminder-title-area">
+          <div class="reminder-bell-badge">⏰</div>
+          <div>
+            <h2>Task Reminder Alert</h2>
+            <p id="reminderSubtext" class="modal-desc">You have pending tasks that require your attention!</p>
+          </div>
+        </div>
+        <button id="closeReminderModalBtn" class="modal-close">&times;</button>
+      </div>
+
+      <div id="reminderTasksList" class="reminder-tasks-list">
+        <!-- Dynamically rendered reminder items -->
+      </div>
+
+      <div class="modal-footer reminder-footer">
+        <button type="button" id="snoozeAllReminderBtn" class="btn-secondary">Snooze 15 Mins 💤</button>
+        <button type="button" id="dismissReminderBtn" class="btn-primary">Dismiss All</button>
       </div>
     </div>
   </div>
